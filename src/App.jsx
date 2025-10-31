@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import './app.css'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Plus, Search, TrendingUp, Users, Briefcase, BookOpen, X, Mail, Calendar, Award } from 'lucide-react';
 
