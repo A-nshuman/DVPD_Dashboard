@@ -5,14 +5,14 @@ const StatsCard = ({ title, value, icon: Icon, gradient }) => {
     <div className={`${gradient} rounded-xl p-6 shadow-lg`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className={`text-sm font-medium ${gradient.includes('from-[#0369a0]') ? 'text-blue-100' : 'text-gray-700'}`}>
+          <p className={`text-sm font-medium ${gradient.includes('from-primary') ? 'text-blue-100' : 'text-gray-700'}`}>
             {title}
           </p>
-          <p className={`text-3xl font-bold mt-2 ${gradient.includes('from-[#0369a0]') ? 'text-white' : 'text-[#121212]'}`}>
+          <p className={`text-3xl font-bold mt-2 ${gradient.includes('from-primary') ? 'text-white' : 'text-text'}`}>
             {value}
           </p>
         </div>
-        <Icon className={`w-12 h-12 ${gradient.includes('from-[#0369a0]') ? 'text-blue-200' : 'text-[#0369a0]'}`} />
+        <Icon className={`w-12 h-12 ${gradient.includes('from-primary') ? 'text-blue-200' : 'text-primary'}`} />
       </div>
     </div>
   );

@@ -6,11 +6,11 @@ const ProjectModal = ({ selectedItem, activeTab, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" 
+      className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50" 
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" 
+        className="bg-gray-200 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" 
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header with Image */}
@@ -22,7 +22,7 @@ const ProjectModal = ({ selectedItem, activeTab, onClose }) => {
           />
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-lg"
+            className="absolute top-4 right-4 bg-background rounded-full p-2 hover:bg-gray-100 transition-colors shadow-lg"
           >
             <X className="w-6 h-6 text-gray-700" />
           </button>
@@ -32,8 +32,8 @@ const ProjectModal = ({ selectedItem, activeTab, onClose }) => {
         <div className="p-8">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="text-3xl font-bold text-[#121212] mb-2">{selectedItem.name}</h2>
-              <span className="inline-block bg-[#bfe0fd] text-[#0369a0] text-sm px-4 py-1 rounded-full font-medium">
+              <h2 className="text-3xl font-bold text-text mb-2">{selectedItem.name}</h2>
+              <span className="inline-block bg-secondary text-primary text-sm px-4 py-1 rounded-full font-medium">
                 {selectedItem.domain}
               </span>
             </div>
@@ -50,16 +50,16 @@ const ProjectModal = ({ selectedItem, activeTab, onClose }) => {
             {/* Contact */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Mail className="w-5 h-5 text-[#0369a0]" />
+                <Mail className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold text-gray-700">Contact</h3>
               </div>
-              <p className="text-[#0369a0] font-medium">{selectedItem.contact}</p>
+              <p className="text-primary font-medium">{selectedItem.contact}</p>
             </div>
 
             {/* Start Date */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-5 h-5 text-[#0369a0]" />
+                <Calendar className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold text-gray-700">Started</h3>
               </div>
               <p className="text-gray-700">{selectedItem.startDate}</p>
@@ -68,7 +68,7 @@ const ProjectModal = ({ selectedItem, activeTab, onClose }) => {
             {/* Status */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Award className="w-5 h-5 text-[#0369a0]" />
+                <Award className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold text-gray-700">Status</h3>
               </div>
               <span className="inline-block bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full font-medium">
@@ -79,7 +79,7 @@ const ProjectModal = ({ selectedItem, activeTab, onClose }) => {
             {/* Additional Info */}
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-5 h-5 text-[#0369a0]" />
+                <TrendingUp className="w-5 h-5 text-primary" />
                 <h3 className="font-semibold text-gray-700">
                   {activeTab === 'startup' ? 'Funding Stage' : 'Publications'}
                 </h3>
@@ -97,9 +97,9 @@ const ProjectModal = ({ selectedItem, activeTab, onClose }) => {
             </h3>
             <div className="space-y-2">
               {selectedItem.studentNames.map((name, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-[#fdfad8] rounded-lg p-3">
-                  <span className="font-medium text-[#121212]">{name}</span>
-                  <span className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full">
+                <div key={idx} className="flex items-center justify-between bg-accent rounded-lg p-3">
+                  <span className="font-medium text-text">{name}</span>
+                  <span className="text-sm text-gray-600 bg-background px-3 py-1 rounded-full">
                     {selectedItem.students[idx]}
                   </span>
                 </div>
@@ -109,17 +109,17 @@ const ProjectModal = ({ selectedItem, activeTab, onClose }) => {
 
           {/* Professor Info for Research */}
           {activeTab === 'research' && selectedItem.type === 'under_prof' && (
-            <div className="bg-[#bfe0fd]/30 rounded-lg p-5 border-l-4 border-[#0369a0]">
+            <div className="bg-secondary/30 rounded-lg p-5 border-l-4 border-primary">
               <h3 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
                 Supervised By
               </h3>
-              <p className="text-lg font-bold text-[#0369a0]">{selectedItem.professor}</p>
+              <p className="text-lg font-bold text-primary">{selectedItem.professor}</p>
               <p className="text-sm text-gray-600">{selectedItem.professorDept} Department</p>
             </div>
           )}
 
           {activeTab === 'research' && selectedItem.type === 'own' && (
-            <div className="bg-[#fdfad8] rounded-lg p-5 border-l-4 border-yellow-500">
+            <div className="bg-accent rounded-lg p-5 border-l-4 border-yellow-500">
               <h3 className="text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wide">
                 Independent Research
               </h3>

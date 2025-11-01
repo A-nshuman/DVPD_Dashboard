@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import './app.css'
 import { BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Plus, Search, TrendingUp, Users, Briefcase, BookOpen, X, Mail, Calendar, Award } from 'lucide-react';
+import { Plus, Search, TrendingUp, Users, Briefcase, BookOpen } from 'lucide-react';
+import ProjectCard from './ProjectCard';
+import ProjectModal from './ProjectModal';
+import StatsCard from './StatsCard';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('startup');
@@ -129,54 +131,44 @@ const Dashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b-2 border-gray-100 sticky top-0 z-10">
+      <header className="bg-[#0369a0] border-b-2 border-gray-100 sticky top-0 px-10 z-10 flex items-center">
+        <img src="src\assets\logo_250.png" alt="logo" className='max-w-20' />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-[#121212]">College Innovation Hub</h1>
-          <p className="text-gray-600 mt-1">Track ongoing research projects and startups</p>
+          <h1 className="text-3xl font-bold text-white">College Innovation Hub</h1>
+          <p className="text-white mt-1">Track ongoing research projects and startups</p>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-[#0369a0] to-[#0284c7] rounded-xl p-6 text-white shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100 text-sm font-medium">Total Startups</p>
-                <p className="text-3xl font-bold mt-2">{startups.length}</p>
-              </div>
-              <Briefcase className="w-12 h-12 text-blue-200" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-[#bfe0fd] to-[#dbeafe] rounded-xl p-6 text-[#121212] shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-700 text-sm font-medium">Research Projects</p>
-                <p className="text-3xl font-bold mt-2">{research.length}</p>
-              </div>
-              <BookOpen className="w-12 h-12 text-[#0369a0]" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-[#fdfad8] to-[#fef9c3] rounded-xl p-6 text-[#121212] shadow-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-700 text-sm font-medium">Students Involved</p>
-                <p className="text-3xl font-bold mt-2">47</p>
-              </div>
-              <Users className="w-12 h-12 text-[#0369a0]" />
-            </div>
-          </div>
+          <StatsCard 
+            title="Total Startups" 
+            value={startups.length} 
+            icon={Briefcase}
+            gradient="bg-gradient-to-br from-primary to-[#0284c7] text-white"
+          />
+          <StatsCard 
+            title="Research Projects" 
+            value={research.length} 
+            icon={BookOpen}
+            gradient="bg-gradient-to-br from-secondary to-[#dbeafe] text-text"
+          />
+          <StatsCard 
+            title="Students Involved" 
+            value={47} 
+            icon={Users}
+            gradient="bg-gradient-to-br from-accent to-[#fef9c3] text-text"
+          />
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-[#121212] mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#0369a0]" />
+          <div className="bg-background rounded-xl shadow-md border border-gray-100 p-6">
+            <h3 className="text-lg font-semibold text-text mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
               Monthly Growth Trend
             </h3>
             <ResponsiveContainer width="100%" height={250}>
@@ -192,8 +184,8 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
-            <h3 className="text-lg font-semibold text-[#121212] mb-4">Domain Distribution</h3>
+          <div className="bg-background rounded-xl shadow-md border border-gray-100 p-6">
+            <h3 className="text-lg font-semibold text-text mb-4">Domain Distribution</h3>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
@@ -217,7 +209,7 @@ const Dashboard = () => {
         </div>
 
         {/* Tabs and Content */}
-        <div className="bg-white rounded-xl shadow-md border border-gray-100">
+        <div className="bg-background rounded-xl shadow-md border border-gray-100">
           {/* Tab Headers */}
           <div className="border-b border-gray-200">
             <div className="flex">
@@ -225,8 +217,8 @@ const Dashboard = () => {
                 onClick={() => setActiveTab('startup')}
                 className={`flex-1 py-4 px-6 text-center font-medium transition-all ${
                   activeTab === 'startup'
-                    ? 'border-b-2 border-[#0369a0] text-[#0369a0] bg-[#bfe0fd]/10'
-                    : 'text-gray-600 hover:text-[#0369a0] hover:bg-gray-50'
+                    ? 'border-b-2 border-primary text-primary bg-secondary/10'
+                    : 'text-gray-600 hover:text-primary hover:bg-gray-50'
                 }`}
               >
                 <Briefcase className="w-5 h-5 inline mr-2" />
@@ -236,8 +228,8 @@ const Dashboard = () => {
                 onClick={() => setActiveTab('research')}
                 className={`flex-1 py-4 px-6 text-center font-medium transition-all ${
                   activeTab === 'research'
-                    ? 'border-b-2 border-[#0369a0] text-[#0369a0] bg-[#bfe0fd]/10'
-                    : 'text-gray-600 hover:text-[#0369a0] hover:bg-gray-50'
+                    ? 'border-b-2 border-primary text-primary bg-secondary/10'
+                    : 'text-gray-600 hover:text-primary hover:bg-gray-50'
                 }`}
               >
                 <BookOpen className="w-5 h-5 inline mr-2" />
@@ -256,10 +248,10 @@ const Dashboard = () => {
                   placeholder={`Search ${activeTab}s...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0369a0] focus:border-transparent outline-none"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                 />
               </div>
-              <button className="bg-[#0369a0] text-white px-6 py-2 rounded-lg hover:bg-[#025a8a] transition-colors flex items-center justify-center gap-2 font-medium">
+              <button className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 font-medium">
                 <Plus className="w-5 h-5" />
                 Add New
               </button>
@@ -270,64 +262,12 @@ const Dashboard = () => {
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredData.map((item) => (
-                <div
+                <ProjectCard
                   key={item.id}
+                  item={item}
+                  activeTab={activeTab}
                   onClick={() => setSelectedItem(item)}
-                  className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer bg-white hover:border-[#0369a0]/50 group"
-                >
-                  {/* Image Holder */}
-                  <div className="w-full h-48 bg-gray-200 overflow-hidden">
-                    <img 
-                      src={item.image} 
-                      alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-
-                  {/* Card Content */}
-                  <div className="p-5">
-                    <h3 className="text-lg font-semibold text-[#121212] mb-2 line-clamp-1">
-                      {item.name}
-                    </h3>
-                    
-                    <span className="inline-block bg-[#bfe0fd] text-[#0369a0] text-xs px-3 py-1 rounded-full font-medium mb-3">
-                      {item.domain}
-                    </span>
-
-                    <div className="space-y-2">
-                      <div>
-                        <p className="text-xs text-gray-600 font-medium mb-1">
-                          {activeTab === 'startup' ? 'Team Members:' : 'Researchers:'}
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {item.studentNames.slice(0, 2).map((name, idx) => (
-                            <span key={idx} className="text-xs bg-[#fdfad8] text-[#121212] px-2 py-1 rounded">
-                              {name}
-                            </span>
-                          ))}
-                          {item.studentNames.length > 2 && (
-                            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">
-                              +{item.studentNames.length - 2} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {activeTab === 'research' && item.type === 'under_prof' && (
-                        <div>
-                          <p className="text-xs text-gray-600 font-medium mb-1">Under Professor:</p>
-                          <p className="text-sm text-[#0369a0] font-medium">{item.professor}</p>
-                        </div>
-                      )}
-
-                      {activeTab === 'research' && item.type === 'own' && (
-                        <div>
-                          <p className="text-xs text-gray-600 font-medium">Independent Research</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                />
               ))}
             </div>
 
@@ -341,126 +281,11 @@ const Dashboard = () => {
       </div>
 
       {/* Popup Modal */}
-      {selectedItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedItem(null)}>
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            {/* Modal Header with Image */}
-            <div className="relative h-64 w-full overflow-hidden rounded-t-2xl">
-              <img 
-                src={selectedItem.image} 
-                alt={selectedItem.name}
-                className="w-full h-full object-cover"
-              />
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-lg"
-              >
-                <X className="w-6 h-6 text-gray-700" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-8">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h2 className="text-3xl font-bold text-[#121212] mb-2">{selectedItem.name}</h2>
-                  <span className="inline-block bg-[#bfe0fd] text-[#0369a0] text-sm px-4 py-1 rounded-full font-medium">
-                    {selectedItem.domain}
-                  </span>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">About</h3>
-                <p className="text-gray-700 leading-relaxed">{selectedItem.description}</p>
-              </div>
-
-              {/* Details Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {/* Contact */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Mail className="w-5 h-5 text-[#0369a0]" />
-                    <h3 className="font-semibold text-gray-700">Contact</h3>
-                  </div>
-                  <p className="text-[#0369a0] font-medium">{selectedItem.contact}</p>
-                </div>
-
-                {/* Start Date */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="w-5 h-5 text-[#0369a0]" />
-                    <h3 className="font-semibold text-gray-700">Started</h3>
-                  </div>
-                  <p className="text-gray-700">{selectedItem.startDate}</p>
-                </div>
-
-                {/* Status */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Award className="w-5 h-5 text-[#0369a0]" />
-                    <h3 className="font-semibold text-gray-700">Status</h3>
-                  </div>
-                  <span className="inline-block bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full font-medium">
-                    {selectedItem.status}
-                  </span>
-                </div>
-
-                {/* Additional Info */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-5 h-5 text-[#0369a0]" />
-                    <h3 className="font-semibold text-gray-700">
-                      {activeTab === 'startup' ? 'Funding Stage' : 'Publications'}
-                    </h3>
-                  </div>
-                  <p className="text-gray-700">
-                    {activeTab === 'startup' ? selectedItem.fundingStage : `${selectedItem.publications} Published`}
-                  </p>
-                </div>
-              </div>
-
-              {/* Team Members */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
-                  {activeTab === 'startup' ? 'Team Members' : 'Research Team'}
-                </h3>
-                <div className="space-y-2">
-                  {selectedItem.studentNames.map((name, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-[#fdfad8] rounded-lg p-3">
-                      <span className="font-medium text-[#121212]">{name}</span>
-                      <span className="text-sm text-gray-600 bg-white px-3 py-1 rounded-full">
-                        {selectedItem.students[idx]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Professor Info for Research */}
-              {activeTab === 'research' && selectedItem.type === 'under_prof' && (
-                <div className="bg-[#bfe0fd]/30 rounded-lg p-5 border-l-4 border-[#0369a0]">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2 uppercase tracking-wide">
-                    Supervised By
-                  </h3>
-                  <p className="text-lg font-bold text-[#0369a0]">{selectedItem.professor}</p>
-                  <p className="text-sm text-gray-600">{selectedItem.professorDept} Department</p>
-                </div>
-              )}
-
-              {activeTab === 'research' && selectedItem.type === 'own' && (
-                <div className="bg-[#fdfad8] rounded-lg p-5 border-l-4 border-yellow-500">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1 uppercase tracking-wide">
-                    Independent Research
-                  </h3>
-                  <p className="text-sm text-gray-600">Self-guided research project</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <ProjectModal 
+        selectedItem={selectedItem}
+        activeTab={activeTab}
+        onClose={() => setSelectedItem(null)}
+      />
     </div>
   );
 };

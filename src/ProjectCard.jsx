@@ -4,7 +4,7 @@ const ProjectCard = ({ item, activeTab, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer bg-white hover:border-[#0369a0]/50 group"
+      className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-xl transition-all cursor-pointer bg-background hover:border-primary/50 group"
     >
       {/* Image Holder */}
       <div className="w-full h-48 bg-gray-200 overflow-hidden">
@@ -17,11 +17,11 @@ const ProjectCard = ({ item, activeTab, onClick }) => {
 
       {/* Card Content */}
       <div className="p-5">
-        <h3 className="text-lg font-semibold text-[#121212] mb-2 line-clamp-1">
+        <h3 className="text-lg font-semibold text-text mb-2 line-clamp-1">
           {item.name}
         </h3>
         
-        <span className="inline-block bg-[#bfe0fd] text-[#0369a0] text-xs px-3 py-1 rounded-full font-medium mb-3">
+        <span className="inline-block bg-secondary text-primary text-xs px-3 py-1 rounded-full font-medium mb-3">
           {item.domain}
         </span>
 
@@ -32,7 +32,7 @@ const ProjectCard = ({ item, activeTab, onClick }) => {
             </p>
             <div className="flex flex-wrap gap-1">
               {item.studentNames.slice(0, 2).map((name, idx) => (
-                <span key={idx} className="text-xs bg-[#fdfad8] text-[#121212] px-2 py-1 rounded">
+                <span key={idx} className="text-xs bg-accent text-text px-2 py-1 rounded">
                   {name}
                 </span>
               ))}
@@ -47,7 +47,7 @@ const ProjectCard = ({ item, activeTab, onClick }) => {
           {activeTab === 'research' && item.type === 'under_prof' && (
             <div>
               <p className="text-xs text-gray-600 font-medium mb-1">Under Professor:</p>
-              <p className="text-sm text-[#0369a0] font-medium">{item.professor}</p>
+              <p className="text-sm text-primary font-medium">{item.professor}</p>
             </div>
           )}
 
