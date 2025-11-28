@@ -8,28 +8,28 @@ const AboutPopup = ({ isOpen, onClose }) => {
       name: "Anshuman Bhardwaj",
       rollNumber: "24103017",
       branch: "Computer Science",
-      photo: "src/assets/anshuman.jpg", 
+      photo: "https://raw.githubusercontent.com/A-nshuman/DVPD_Dashboard/refs/heads/main/src/assets/anshuman.jpg", 
     },
     {
       id: 2,
       name: "Abhishek Bhatti",
       rollNumber: "24103004",
       branch: "Computer Science",
-      photo: "src/assets/bhatti.png",
+      photo: "https://raw.githubusercontent.com/A-nshuman/DVPD_Dashboard/refs/heads/main/src/assets/bhatti.png",
     },
     {
       id: 3,
       name: "Javin Chutani",
       rollNumber: "24117014",
       branch: "Data Science",
-      photo: "src/assets/javin.webp",
+      photo: "https://raw.githubusercontent.com/A-nshuman/DVPD_Dashboard/refs/heads/main/src/assets/javin.webp",
     },
     {
       id: 4,
       name: "Jashan Aneja",
       rollNumber: "24117013",
       branch: "Data Science",
-      photo: "src/assets/jashan.jpg",
+      photo: "https://raw.githubusercontent.com/A-nshuman/DVPD_Dashboard/refs/heads/main/src/assets/jashan.jpg",
     },
   ];
 

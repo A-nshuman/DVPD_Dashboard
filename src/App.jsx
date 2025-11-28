@@ -95,7 +95,7 @@ const App = () => {
 
         <div className="absolute left-1/2 -translate-x-1/2 bottom-[-25px] z-10">
           <img
-            src="src/assets/logo_250.png"
+            src="https://raw.githubusercontent.com/A-nshuman/DVPD_Dashboard/refs/heads/main/src/assets/logo_250.png"
             alt="Logo"
             className="w-24 h-24 object-contain rounded-full"
           />
