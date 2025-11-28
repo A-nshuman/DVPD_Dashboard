@@ -1,1 +1,18 @@
+/* import the full Tailwind v4 "CSS-first" bundle */
 @import "tailwindcss";
+
+/* your design tokens (regular CSS variables) */
+:root {
+  --text: #333333;
+  --background: #FFFFFF;
+  --primary: #0D47A1;
+  --secondary: #E3F2FD;
+  --accent: #2196F3;
+}
+
+/* any custom global styles you want */
+html, body, #root {
+  background: var(--background);
+  color: var(--text);
+  height: 100%;
+}
