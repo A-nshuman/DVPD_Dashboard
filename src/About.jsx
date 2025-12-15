@@ -22,7 +22,7 @@ const AboutPopup = ({ isOpen, onClose }) => {
       name: "Javin Chutani",
       rollNumber: "24117014",
       branch: "Data Science",
-      photo: "https://raw.githubusercontent.com/A-nshuman/DVPD_Dashboard/refs/heads/main/src/assets/javin.webp",
+      photo: "https://media.licdn.com/dms/image/v2/D4D03AQFgQR2lMXJrnQ/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1727542556872?e=1767225600&v=beta&t=xzs7e_8h2dgjTDuNB2bqvP3seCPGoPrAFUSIncOYvqY",
     },
     {
       id: 4,
