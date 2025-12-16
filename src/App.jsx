@@ -8,10 +8,36 @@ import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import AboutPopup from "./About";
 import StatsCard from "./StatsCard";
-import { Search, TrendingUp, Filter, Activity, Hexagon, Layers, Download, CheckCircle } from "lucide-react";
+import { Search, TrendingUp, Filter, Activity, Hexagon, Layers, Download, CheckCircle, Info } from "lucide-react";
 
 // --- IMPORT DATA ---
 import { startups, research } from "./data";
+
+// --- CUSTOM TOOLTIP FOR SCATTER PLOT ---
+const CustomScatterTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-white p-4 border border-gray-100 shadow-xl rounded-xl text-sm z-50 max-w-[250px]">
+        <p className="font-bold text-gray-800 mb-1">{data.name}</p>
+        <div className="space-y-1">
+          <p className="text-blue-600 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+            Duration: <span className="font-medium text-gray-700">{data.x} Months</span>
+          </p>
+          <p className="text-cyan-600 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-cyan-600"></span>
+            Traction Score: <span className="font-medium text-gray-700">{data.y}</span>
+          </p>
+          <p className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100 italic">
+            {data.reason}
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 const App = () => {
   const [activeTab, setActiveTab] = useState("startup");
@@ -31,10 +57,8 @@ const App = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // CSV Export Function
   const downloadCSV = () => {
     const headers = ["ID", "Name", "Domain", "Status", "Funding/Type", "Students", "Contact"];
-    
     const rows = filteredData.map(item => [
       item.id,
       `"${item.name}"`, 
@@ -44,12 +68,7 @@ const App = () => {
       `"${item.studentNames.join(', ')}"`,
       item.contact
     ]);
-
-    const csvContent = [
-      headers.join(","), 
-      ...rows.map(row => row.join(","))
-    ].join("\n");
-
+    const csvContent = [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -58,17 +77,37 @@ const App = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
     showToast("Report downloaded successfully!");
   };
 
   // --- ANALYTICS DATA PREPARATION ---
 
-  // 1. Double Line Chart Data (Comparison)
+  // 1. Dynamic Total Funding Calculation
+  const totalFunding = useMemo(() => {
+    let total = 0;
+    // Estimated values (in Lakhs) based on your requested filter stages
+    if (activeTab === 'startup') {
+        const valuations = { 
+            "Series A": 200, 
+            "Seed": 50, "Seed Funding": 50,
+            "Grant": 10, "Grant Funded": 10,
+            "Pre-seed": 5, 
+            "Bootstrapped": 0, 
+            "Idea Phase": 0 
+        };
+        total = currentData.reduce((acc, item) => acc + (valuations[item.fundingStage] || 0), 0);
+    } else {
+        const grantValues = { "grant_funded": 20, "under_prof": 2, "independent": 0 };
+        total = currentData.reduce((acc, item) => acc + (grantValues[item.type] || 0), 0);
+    }
+
+    if (total >= 100) return `₹ ${(total / 100).toFixed(1)} Cr`;
+    return `₹ ${total} L`;
+  }, [currentData, activeTab]);
+
+  // 2. Double Line Chart Data (Comparison)
   const comparisonData = useMemo(() => {
     const dataByYear = {};
-    
-    // Helper to aggregate counts
     const processData = (dataset, key) => {
         dataset.forEach(item => {
             const year = item.startDate.split(' ')[1];
@@ -76,15 +115,12 @@ const App = () => {
             dataByYear[year][key] += 1;
         });
     };
-
     processData(startups, 'startup');
     processData(research, 'research');
-
-    // Convert object to sorted array
     return Object.values(dataByYear).sort((a, b) => a.year - b.year);
   }, []);
 
-  // 2. Scatter Plot: Impact vs Duration
+  // 3. Scatter Plot: Impact vs Duration (UPDATED LOGIC)
   const scatterData = useMemo(() => {
     return currentData.map(item => {
       const start = new Date(item.startDate);
@@ -92,11 +128,23 @@ const App = () => {
       const months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
       
       let traction = 0;
+      let reason = "";
+
       if (activeTab === 'startup') {
-         const stages = { "Series A": 90, "Seed": 70, "Grant": 50, "Pre-seed": 40, "Bootstrapped": 30, "Idea Phase": 10 };
+         // YOUR UPDATED FILTER LOGIC HERE
+         const stages = { 
+             "Series A": 90, 
+             "Seed": 70, "Seed Funding": 70, 
+             "Grant": 50, "Grant Funded": 50,
+             "Pre-seed": 40, 
+             "Bootstrapped": 30, 
+             "Idea Phase": 10 
+         };
          traction = stages[item.fundingStage] || 20;
+         reason = `Stage: ${item.fundingStage} (${traction} pts)`;
       } else {
          traction = (item.publications * 20) + 20;
+         reason = `${item.publications} Publications`;
       }
       const jitter = Math.floor(Math.random() * 10) - 5; 
 
@@ -105,12 +153,13 @@ const App = () => {
         name: item.name,
         x: Math.max(1, months),
         y: traction + jitter,
-        z: 1 
+        z: 1,
+        reason
       };
     });
   }, [currentData, activeTab]);
 
-  // 3. Radar Chart: Ecosystem Shape
+  // 4. Radar Chart
   const radarData = useMemo(() => {
     const domainMetrics = {};
     currentData.forEach(item => {
@@ -124,7 +173,6 @@ const App = () => {
        } else {
          traction = item.publications + 1;
        }
-
        domainMetrics[domain].count += 1;
        domainMetrics[domain].traction += traction;
     });
@@ -137,7 +185,7 @@ const App = () => {
     }));
   }, [currentData, activeTab]);
 
-  // 4. Bar Chart (Existing)
+  // 5. Bar Chart
   const barChartData = useMemo(() => {
     const counts = {};
     currentData.forEach(item => {
@@ -150,12 +198,22 @@ const App = () => {
     }));
   }, [currentData, activeTab]);
 
-  const uniqueStatuses = useMemo(() => ["All", ...new Set(currentData.map(i => i.status))], [currentData]);
+  // --- UPDATED FILTER LOGIC ---
+  const uniqueStatuses = useMemo(() => {
+      // If startup, filter by Funding Stage. If research, filter by Type.
+      const field = activeTab === 'startup' ? 'fundingStage' : 'type';
+      const items = new Set(currentData.map(item => item[field]));
+      return ["All", ...Array.from(items)];
+  }, [currentData, activeTab]);
 
   const filteredData = currentData.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.domain.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === "All" || item.status === filterStatus;
+    
+    // Updated filter matching
+    const fieldToCheck = activeTab === 'startup' ? item.fundingStage : item.type;
+    const matchesFilter = filterStatus === "All" || fieldToCheck === filterStatus;
+    
     return matchesSearch && matchesFilter;
   });
 
@@ -189,7 +247,10 @@ const App = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
              <StatsCard title="Total Projects" value={currentData.length} gradient="bg-gradient-to-br from-blue-600 to-blue-800" />
              <StatsCard title="Active Students" value="42" gradient="bg-gradient-to-br from-indigo-500 to-indigo-700" />
-             <StatsCard title="Total Funding" value="₹ 4.5 Cr" gradient="bg-gradient-to-br from-cyan-500 to-cyan-700" />
+             
+             {/* DYNAMIC TOTAL FUNDING CARD */}
+             <StatsCard title="Total Funding" value={totalFunding} gradient="bg-gradient-to-br from-cyan-500 to-cyan-700" />
+             
              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col justify-center items-center cursor-pointer hover:shadow-md transition-all" onClick={() => setActiveTab(activeTab === 'startup' ? 'research' : 'startup')}>
                 <p className="text-sm text-gray-500 font-medium">Current View</p>
                 <div className="flex items-center gap-2 mt-1">
@@ -213,6 +274,11 @@ const App = () => {
                             <Layers size={18} className="text-[#0D47A1]"/> 
                             Impact Matrix (Duration vs. Traction)
                         </h3>
+                        {/* Legend for context */}
+                        <div className="text-[10px] flex gap-3 text-gray-500">
+                           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-600"></span>Startup (Funding)</span>
+                           <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-cyan-600"></span>Research (Pubs)</span>
+                        </div>
                     </div>
                     <div className="p-4 h-[320px]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -225,8 +291,8 @@ const App = () => {
                                     <Label value="Traction Score" angle={-90} position="insideLeft" style={{ fontSize: '12px', fill: '#666' }} />
                                 </YAxis>
                                 <ZAxis type="number" dataKey="z" range={[60, 400]} />
-                                <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'}} />
-                                <Legend verticalAlign="top" height={36}/>
+                                {/* Custom Tooltip Used Here */}
+                                <Tooltip content={<CustomScatterTooltip />} cursor={{ strokeDasharray: '3 3' }} />
                                 <Scatter name="Projects" data={scatterData} fill="#0D47A1" fillOpacity={0.7} shape="circle" />
                             </ScatterChart>
                         </ResponsiveContainer>
@@ -277,7 +343,7 @@ const App = () => {
             {/* RIGHT COLUMN: Secondary Charts */}
             <div className="space-y-6">
                 
-                {/* 3. RADAR CHART (Ecosystem Shape) */}
+                {/* 3. RADAR CHART */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h3 className="text-sm uppercase tracking-wider font-bold mb-4 text-gray-500 flex items-center gap-2">
                         <Hexagon size={16} className="text-[#0D47A1]" /> Ecosystem Focus
@@ -297,7 +363,7 @@ const App = () => {
                     </div>
                 </div>
 
-                {/* 4. PIE CHART (Distribution) */}
+                {/* 4. PIE CHART */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h3 className="text-sm uppercase tracking-wider font-bold mb-4 text-gray-500">Distribution</h3>
                     <div className="h-[250px]">
@@ -333,7 +399,7 @@ const App = () => {
             </div>
         </div>
 
-        {/* SEARCH & FILTER LIST */}
+        {/* SEARCH, FILTER & EXPORT */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[500px] flex flex-col">
              <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 bg-gray-50/50 rounded-t-2xl">
                   <div className="relative flex-1">
@@ -348,7 +414,6 @@ const App = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    {/* Filter Dropdown */}
                     <div className="relative min-w-[140px]">
                         <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <select
@@ -362,7 +427,6 @@ const App = () => {
                         </select>
                     </div>
 
-                    {/* Export Button */}
                     <button 
                       onClick={downloadCSV}
                       className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:text-[#0D47A1] hover:border-[#0D47A1]/30 transition-all font-medium text-sm whitespace-nowrap"
@@ -400,7 +464,6 @@ const App = () => {
        
       <AboutPopup isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
 
-      {/* TOAST NOTIFICATION */}
       <div className={`fixed bottom-6 right-6 transform transition-all duration-300 z-50 ${toast ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         {toast && (
           <div className="bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3">
