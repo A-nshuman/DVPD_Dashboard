@@ -1,14 +1,14 @@
 import React, { useState, useMemo } from "react";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, AreaChart, Area, Legend, ScatterChart, Scatter, ZAxis, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Label
+  XAxis, YAxis, CartesianGrid, Legend, ScatterChart, Scatter, ZAxis, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Label, LineChart, Line
 } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import AboutPopup from "./About";
 import StatsCard from "./StatsCard";
-import { Search, TrendingUp, BarChart2, Filter, Activity, Hexagon, Layers } from "lucide-react";
+import { Search, TrendingUp, Filter, Activity, Hexagon, Layers, Download, CheckCircle } from "lucide-react";
 
 // --- IMPORT DATA ---
 import { startups, research } from "./data";
@@ -19,21 +19,70 @@ const App = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [selectedItem, setSelectedItem] = useState(null);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const COLORS = ["#0D47A1", "#1976D2", "#42A5F5", "#90CAF9", "#E3F2FD"];
   const currentData = activeTab === "startup" ? startups : research;
 
+  // --- HELPER FUNCTIONS ---
+
+  const showToast = (message) => {
+    setToast({ message });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // CSV Export Function
+  const downloadCSV = () => {
+    const headers = ["ID", "Name", "Domain", "Status", "Funding/Type", "Students", "Contact"];
+    
+    const rows = filteredData.map(item => [
+      item.id,
+      `"${item.name}"`, 
+      `"${item.domain}"`,
+      item.status,
+      activeTab === 'startup' ? item.fundingStage : item.type,
+      `"${item.studentNames.join(', ')}"`,
+      item.contact
+    ]);
+
+    const csvContent = [
+      headers.join(","), 
+      ...rows.map(row => row.join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${activeTab}_report_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast("Report downloaded successfully!");
+  };
+
   // --- ANALYTICS DATA PREPARATION ---
 
-  // 1. Timeline (Area Chart)
-  const timelineData = useMemo(() => {
-    const counts = {};
-    currentData.forEach(item => {
-      const year = item.startDate.split(' ')[1];
-      counts[year] = (counts[year] || 0) + 1;
-    });
-    return Object.keys(counts).sort().map(year => ({ year, count: counts[year] }));
-  }, [currentData]);
+  // 1. Double Line Chart Data (Comparison)
+  const comparisonData = useMemo(() => {
+    const dataByYear = {};
+    
+    // Helper to aggregate counts
+    const processData = (dataset, key) => {
+        dataset.forEach(item => {
+            const year = item.startDate.split(' ')[1];
+            if (!dataByYear[year]) dataByYear[year] = { year, startup: 0, research: 0 };
+            dataByYear[year][key] += 1;
+        });
+    };
+
+    processData(startups, 'startup');
+    processData(research, 'research');
+
+    // Convert object to sorted array
+    return Object.values(dataByYear).sort((a, b) => a.year - b.year);
+  }, []);
 
   // 2. Scatter Plot: Impact vs Duration
   const scatterData = useMemo(() => {
@@ -184,30 +233,41 @@ const App = () => {
                     </div>
                 </div>
 
-                {/* 2. AREA CHART (Timeline) */}
+                {/* 2. DOUBLE LINE CHART (Timeline Comparison) */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                         <h3 className="font-bold text-gray-800 flex items-center gap-2">
                             <TrendingUp size={18} className="text-[#0D47A1]"/> 
-                            Growth Timeline
+                            Growth Trends (Comparison)
                         </h3>
                     </div>
                     <div className="p-4 h-[250px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={timelineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#0D47A1" stopOpacity={0.3}/>
-                                        <stop offset="95%" stopColor="#0D47A1" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
+                            <LineChart data={comparisonData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0"/>
                                 <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} dy={10} />
                                 <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
-                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none' }} />
-                                <Legend verticalAlign="top" height={36}/>
-                                <Area name="New Projects" type="monotone" dataKey="count" stroke="#0D47A1" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
-                            </AreaChart>
+                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                                <Legend verticalAlign="top" height={36} iconType="plainline"/>
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="startup" 
+                                    name="Startups" 
+                                    stroke="#0D47A1" 
+                                    strokeWidth={3} 
+                                    dot={{r: 4, fill: '#0D47A1'}}
+                                    activeDot={{r: 6}}
+                                />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="research" 
+                                    name="Research" 
+                                    stroke="#00D1FD" 
+                                    strokeWidth={3} 
+                                    dot={{r: 4, fill: '#00D1FD'}}
+                                    activeDot={{r: 6}}
+                                />
+                            </LineChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
@@ -286,17 +346,31 @@ const App = () => {
                       className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] outline-none transition-all"
                     />
                   </div>
-                  <div className="relative w-full sm:w-48">
-                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="w-full pl-9 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0D47A1]/20 outline-none appearance-none cursor-pointer text-sm font-medium"
+                  
+                  <div className="flex gap-2">
+                    {/* Filter Dropdown */}
+                    <div className="relative min-w-[140px]">
+                        <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="w-full pl-9 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0D47A1]/20 outline-none appearance-none cursor-pointer text-sm font-medium"
+                        >
+                            {uniqueStatuses.map(status => (
+                                <option key={status} value={status}>{status}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Export Button */}
+                    <button 
+                      onClick={downloadCSV}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 hover:text-[#0D47A1] hover:border-[#0D47A1]/30 transition-all font-medium text-sm whitespace-nowrap"
+                      title="Export to CSV"
                     >
-                        {uniqueStatuses.map(status => (
-                            <option key={status} value={status}>{status}</option>
-                        ))}
-                    </select>
+                      <Download className="w-4 h-4" />
+                      <span className="hidden sm:inline">Export</span>
+                    </button>
                   </div>
              </div>
 
@@ -325,6 +399,19 @@ const App = () => {
       </AnimatePresence>
        
       <AboutPopup isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
+
+      {/* TOAST NOTIFICATION */}
+      <div className={`fixed bottom-6 right-6 transform transition-all duration-300 z-50 ${toast ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+        {toast && (
+          <div className="bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3">
+            <div className="bg-green-500 rounded-full p-1">
+              <CheckCircle size={16} className="text-white" />
+            </div>
+            <span className="font-medium">{toast.message}</span>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 };
