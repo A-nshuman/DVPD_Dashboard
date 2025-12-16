@@ -1,78 +1,94 @@
 import React, { useState, useMemo } from "react";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  AreaChart,
-  Area,
-  Legend
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, AreaChart, Area, Legend, ScatterChart, Scatter, ZAxis, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Label
 } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import AboutPopup from "./About";
 import StatsCard from "./StatsCard";
-import { Search, TrendingUp, BarChart2 } from "lucide-react";
+import { Search, TrendingUp, BarChart2, Filter, Activity, Hexagon, Layers } from "lucide-react";
+
+// --- IMPORT DATA ---
+import { startups, research } from "./data";
 
 const App = () => {
   const [activeTab, setActiveTab] = useState("startup");
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
   const [selectedItem, setSelectedItem] = useState(null);
   const [aboutOpen, setAboutOpen] = useState(false);
 
-  // --- Sample data (Same as provided) ---
-  const startups = [
-    { id: 1, name: "MediCare AI", domain: "HealthTech", studentNames: ["Sanya Gupta"], students: ["2021BT012"], contact: "medicare@college.edu", description: "Early disease detection...", startDate: "February 2024", status: "Active", fundingStage: "Grant", image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop" },
-    { id: 2, name: "FinWise", domain: "FinTech", studentNames: ["Arjun Das"], students: ["2020CS055"], contact: "finwise@college.edu", description: "Micro-investment platform...", startDate: "April 2024", status: "In Progress", fundingStage: "Bootstrapped", image: "https://images.unsplash.com/photo-1556742049-0cfed4f7a07d?w=400&h=250&fit=crop" },
-    { id: 3, name: "AgriDrone", domain: "AgriTech", studentNames: ["Manish Tiwari"], students: ["2021ME044"], contact: "agridrone@college.edu", description: "Autonomous drones...", startDate: "January 2024", status: "Active", fundingStage: "Seed", image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?w=400&h=250&fit=crop" },
-    { id: 4, name: "CyberShield", domain: "Cybersecurity", studentNames: ["Aditya Joshi"], students: ["2020CS088"], contact: "cybershield@college.edu", description: "Vulnerability scanner...", startDate: "May 2024", status: "Active", fundingStage: "Pre-seed", image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=250&fit=crop" },
-    { id: 5, name: "EcoPack", domain: "Sustainability", studentNames: ["Pooja Iyer"], students: ["2021CH015"], contact: "ecopack@college.edu", description: "Biodegradable packaging...", startDate: "December 2023", status: "Active", fundingStage: "Grant", image: "https://images.unsplash.com/photo-1542601906990-b4d3fb7d5763?w=400&h=250&fit=crop" },
-    { id: 6, name: "FitTrack", domain: "Wellness", studentNames: ["Varun Kapoor"], students: ["2022CS019"], contact: "fittrack@college.edu", description: "Wearable device...", startDate: "June 2024", status: "In Progress", fundingStage: "Bootstrapped", image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=250&fit=crop" },
-    { id: 7, name: "RoboAssist", domain: "Robotics", studentNames: ["Karan Singh"], students: ["2020EC091"], contact: "roboassist@college.edu", description: "Robotic arms...", startDate: "November 2023", status: "Completed", fundingStage: "Series A", image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=250&fit=crop" },
-    { id: 8, name: "UrbanCommute", domain: "Transportation", studentNames: ["Riya Deshmukh"], students: ["2021CE018"], contact: "urbancommute@college.edu", description: "Ride-sharing app...", startDate: "July 2024", status: "Active", fundingStage: "Pre-seed", image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=400&h=250&fit=crop" },
-    { id: 9, name: "SmartHome IO", domain: "IoT", studentNames: ["Tarun Bhatia"], students: ["2021EC050"], contact: "smarthome@college.edu", description: "Modular IoT system...", startDate: "March 2024", status: "Active", fundingStage: "Bootstrapped", image: "https://images.unsplash.com/photo-1558002038-1091a1661116?w=400&h=250&fit=crop" },
-    { id: 10, name: "LangBridge", domain: "EdTech", studentNames: ["Aryan Saxena"], students: ["2022BA002"], contact: "langbridge@college.edu", description: "Translation tool...", startDate: "August 2024", status: "Idea Phase", fundingStage: "None", image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400&h=250&fit=crop" },
-  ];
-
-  const research = [
-    { id: 1, name: "Quantum Computing", domain: "Computer Science", studentNames: ["Rohan"], students: ["2020CS010"], contact: "quantum@college.edu", description: "Quantum algorithms...", startDate: "August 2023", status: "Ongoing", type: "under_prof", professor: "Dr. Sharma", publications: 2, image: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=250&fit=crop" },
-    { id: 2, name: "Glaucoma Detection", domain: "Biomedical", studentNames: ["Ishaan"], students: ["2021BM005"], contact: "biomed@college.edu", description: "CNN detection...", startDate: "January 2024", status: "Ongoing", type: "under_prof", professor: "Dr. Iyer", publications: 1, image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&h=250&fit=crop" },
-    { id: 3, name: "Sustainable Concrete", domain: "Civil", studentNames: ["Arjun"], students: ["2020CE045"], contact: "green@college.edu", description: "Concrete mixtures...", startDate: "September 2023", status: "Completed", type: "grant_funded", professor: "Dr. Gill", publications: 3, image: "https://images.unsplash.com/photo-1590486803833-1c5dc8ce2ac6?w=400&h=250&fit=crop" },
-    { id: 4, name: "Swarm Robotics", domain: "Robotics", studentNames: ["Vikram"], students: ["2021RA002"], contact: "swarm@college.edu", description: "Swarm intelligence...", startDate: "March 2023", status: "Ongoing", type: "under_prof", professor: "Dr. Kulkarni", publications: 0, image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=250&fit=crop" },
-    { id: 5, name: "Supply Chain Blockchain", domain: "IT", studentNames: ["Neha"], students: ["2020IT088"], contact: "crypto@college.edu", description: "Hyperledger Fabric...", startDate: "November 2023", status: "Ongoing", type: "independent", professor: "Prof. Roy", publications: 1, image: "https://images.unsplash.com/photo-1639322537228-f710d846310a?w=400&h=250&fit=crop" },
-    { id: 6, name: "Perovskite Solar", domain: "Material Science", studentNames: ["Karan"], students: ["2022MS004"], contact: "solar@college.edu", description: "Solar cells...", startDate: "February 2024", status: "Ongoing", type: "under_prof", professor: "Dr. Thomas", publications: 0, image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=400&h=250&fit=crop" },
-    { id: 7, name: "Regional NLP", domain: "Computer Science", studentNames: ["Manoj"], students: ["2020CS102"], contact: "nlp@college.edu", description: "Translation model...", startDate: "August 2022", status: "Published", type: "grant_funded", professor: "Dr. Venkataraman", publications: 4, image: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=400&h=250&fit=crop" },
-    { id: 8, name: "Microplastics", domain: "Env Science", studentNames: ["Riya"], students: ["2021ES033"], contact: "water@college.edu", description: "Microplastics...", startDate: "June 2023", status: "Completed", type: "under_prof", professor: "Dr. Siddiqui", publications: 2, image: "https://images.unsplash.com/photo-1617155093730-a8bf47be792d?w=400&h=250&fit=crop" },
-    { id: 9, name: "Smart Grid", domain: "Electrical", studentNames: ["Devendra"], students: ["2020EE014"], contact: "grid@college.edu", description: "Load balancing...", startDate: "October 2023", status: "Ongoing", type: "under_prof", professor: "Prof. Das", publications: 1, image: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=400&h=250&fit=crop" },
-    { id: 10, name: "CRISPR Drought", domain: "Biotech", studentNames: ["Tara"], students: ["2021BT007"], contact: "genetics@college.edu", description: "Rice plants...", startDate: "January 2023", status: "Ongoing", type: "under_prof", professor: "Dr. Gupta", publications: 2, image: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=400&h=250&fit=crop" },
-    { id: 11, name: "Drone Aerodynamics", domain: "Aerospace", studentNames: ["Sameer"], students: ["2022AE019"], contact: "aero@college.edu", description: "CFD analysis...", startDate: "April 2024", status: "Just Started", type: "independent", professor: "Dr. D'Souza", publications: 0, image: "https://images.unsplash.com/photo-1527977966376-1c8408f9f108?w=400&h=250&fit=crop" },
-  ];
-
-  const COLORS = ["#00D1FD", "#00A5EA", "#1370CE", "#004792", "#535E97"];
+  const COLORS = ["#0D47A1", "#1976D2", "#42A5F5", "#90CAF9", "#E3F2FD"];
   const currentData = activeTab === "startup" ? startups : research;
 
-  // --- DATA PROCESSING FOR CHARTS ---
+  // --- ANALYTICS DATA PREPARATION ---
 
-  // 1. Timeline Data (Group by Year)
+  // 1. Timeline (Area Chart)
   const timelineData = useMemo(() => {
     const counts = {};
     currentData.forEach(item => {
-      const year = item.startDate.split(' ')[1]; // Extract Year
+      const year = item.startDate.split(' ')[1];
       counts[year] = (counts[year] || 0) + 1;
     });
-    return Object.keys(counts).sort().map(year => ({
-      year,
-      count: counts[year]
-    }));
+    return Object.keys(counts).sort().map(year => ({ year, count: counts[year] }));
   }, [currentData]);
 
-  // 2. Bar Chart Data (Funding for Startups, Type for Research)
+  // 2. Scatter Plot: Impact vs Duration
+  const scatterData = useMemo(() => {
+    return currentData.map(item => {
+      const start = new Date(item.startDate);
+      const now = new Date();
+      const months = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
+      
+      let traction = 0;
+      if (activeTab === 'startup') {
+         const stages = { "Series A": 90, "Seed": 70, "Grant": 50, "Pre-seed": 40, "Bootstrapped": 30, "Idea Phase": 10 };
+         traction = stages[item.fundingStage] || 20;
+      } else {
+         traction = (item.publications * 20) + 20;
+      }
+      const jitter = Math.floor(Math.random() * 10) - 5; 
+
+      return {
+        id: item.id,
+        name: item.name,
+        x: Math.max(1, months),
+        y: traction + jitter,
+        z: 1 
+      };
+    });
+  }, [currentData, activeTab]);
+
+  // 3. Radar Chart: Ecosystem Shape
+  const radarData = useMemo(() => {
+    const domainMetrics = {};
+    currentData.forEach(item => {
+       const domain = item.domain.split(" ")[0];
+       if (!domainMetrics[domain]) domainMetrics[domain] = { count: 0, traction: 0 };
+       
+       let traction = 0;
+       if (activeTab === 'startup') {
+         const stages = { "Series A": 5, "Seed": 4, "Grant": 3, "Pre-seed": 2, "Bootstrapped": 1, "Idea Phase": 1 };
+         traction = stages[item.fundingStage] || 1;
+       } else {
+         traction = item.publications + 1;
+       }
+
+       domainMetrics[domain].count += 1;
+       domainMetrics[domain].traction += traction;
+    });
+
+    return Object.keys(domainMetrics).slice(0, 5).map(domain => ({
+        subject: domain,
+        A: domainMetrics[domain].count * 20, 
+        B: domainMetrics[domain].traction * 10,
+        fullMark: 100
+    }));
+  }, [currentData, activeTab]);
+
+  // 4. Bar Chart (Existing)
   const barChartData = useMemo(() => {
     const counts = {};
     currentData.forEach(item => {
@@ -85,231 +101,230 @@ const App = () => {
     }));
   }, [currentData, activeTab]);
 
-  // 3. Domain Data (Existing)
-  const domainData = useMemo(() => {
-    const counts = {};
-    currentData.forEach(item => {
-      // Simple grouping for demo
-      let domain = item.domain.split(' ')[0]; 
-      counts[domain] = (counts[domain] || 0) + 1;
-    });
-    // Take top 5 for cleaner chart
-    return Object.keys(counts).slice(0, 5).map(key => ({
-      name: key,
-      value: counts[key]
-    }));
-  }, [currentData]);
+  const uniqueStatuses = useMemo(() => ["All", ...new Set(currentData.map(i => i.status))], [currentData]);
 
-  const filteredData = currentData.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.domain.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredData = currentData.filter((item) => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          item.domain.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filterStatus === "All" || item.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
 
   return (
-    <div className="min-h-screen bg-background text-text">
+    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-[#0D47A1] selection:text-white">
+      
       {/* HEADER */}
-      <header className="bg-[#0D47A1] text-white p-6 flex items-center justify-between relative overflow-visible z-20">
-        <h1 className="text-xl sm:text-2xl font-bold">College Innovation Hub</h1>
-        {/* <div className="absolute bottom-[-28px] left-1/2 -translate-x-1/2 w-[150px] h-16 bg-[#0D47A1] rounded-b-[10000px]" /> */}
-        <div className="absolute left-1/2 -translate-x-1/2 z-10">
-          <img
-            src="https://raw.githubusercontent.com/A-nshuman/DVPD_Dashboard/refs/heads/main/src/assets/logo_250.png"
-            alt="Logo"
-            className="w-20 h-20 object-contain rounded-full bg-none"
-          />
+      <header className="sticky top-0 z-30 bg-[#0D47A1]/95 backdrop-blur-md text-white px-6 py-4 shadow-xl flex items-center justify-between">
+        <div className="flex items-center gap-3">
+            <div className="bg-white p-1.5 rounded-xl shadow-lg transform rotate-3 hover:rotate-0 transition-all duration-300">
+                <img
+                    src="https://raw.githubusercontent.com/A-nshuman/DVPD_Dashboard/refs/heads/main/src/assets/logo_250.png"
+                    alt="Logo"
+                    className="w-9 h-9 object-contain"
+                />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">College Innovation Hub</h1>
         </div>
-        <button onClick={() => setAboutOpen(true)} className="bg-white text-[#0D47A1] px-4 py-2 rounded-lg hover:bg-gray-100 cursor-pointer font-semibold">
-          About
+        <button 
+            onClick={() => setAboutOpen(true)} 
+            className="bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-2 rounded-full transition-all text-sm font-medium backdrop-blur-sm shadow-sm"
+        >
+          Dev Team
         </button>
       </header>
 
-      {/* MAIN LAYOUT */}
-      <div className="flex flex-col lg:flex-row gap-6 px-4 py-6 mt-6">
+      {/* DASHBOARD LAYOUT */}
+      <div className="max-w-[1600px] mx-auto p-4 sm:p-6 space-y-6">
         
-        {/* LEFT SIDEBAR (Navigation) */}
-        <aside className="w-full lg:w-64 flex-shrink-0">
-          <div className="bg-white rounded-xl shadow-md border p-4 sticky top-6">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">Category</h3>
-            <div className="space-y-2">
-              {["startup", "research"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`w-full py-3 px-4 rounded-lg font-medium transition-all text-left flex items-center justify-between ${
-                    activeTab === tab
-                      ? "bg-[#0D47A1] text-white shadow-lg"
-                      : "bg-gray-50 text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  {activeTab === tab && <span className="w-2 h-2 bg-white rounded-full"></span>}
-                </button>
-              ))}
-            </div>
-            
-            {/* Mini Summary in Left Sidebar */}
-            <div className="mt-8 pt-6 border-t">
-               <div className="text-sm text-gray-500 mb-2">Active {activeTab === 'startup' ? 'Funded' : 'Grants'}</div>
-               <div className="text-3xl font-bold text-[#0D47A1]">
-                 {activeTab === 'startup' ? '₹ 45L+' : '₹ 1.2Cr'}
-               </div>
-               <div className="text-xs text-green-600 mt-1 flex items-center">
-                 <TrendingUp size={12} className="mr-1"/> +12% from last year
-               </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* CENTER CONTENT */}
-        <main className="flex-1 min-w-0">
-          
-          {/* VISUALIZATION: TRENDS (AREA CHART) */}
-          <div className="bg-white rounded-xl shadow-md border mb-6 overflow-hidden">
-            <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-                <h3 className="font-semibold text-gray-700 flex items-center gap-2">
-                    <TrendingUp size={18} className="text-[#0D47A1]"/> 
-                    Innovation Timeline (Projects Started)
-                </h3>
-            </div>
-            <div className="p-4 h-[250px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={timelineData}>
-                        <defs>
-                            <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#0D47A1" stopOpacity={0.8}/>
-                                <stop offset="95%" stopColor="#0D47A1" stopOpacity={0}/>
-                            </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                        <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#6b7280', fontSize: 12}} />
-                        <YAxis axisLine={false} tickLine={false} tick={{fill: '#6b7280', fontSize: 12}} />
-                        <Tooltip 
-                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                        />
-                        <Area type="monotone" dataKey="count" stroke="#0D47A1" fillOpacity={1} fill="url(#colorCount)" />
-                    </AreaChart>
-                </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* LIST SECTION */}
-          <div className="bg-white rounded-xl shadow-md border">
-            <div className="p-4 border-b flex items-center gap-4 bg-gray-50 rounded-t-xl">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder={`Search ${activeTab}s by name or domain...`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-white border rounded-lg focus:ring-2 focus:ring-[#0D47A1] outline-none transition-all shadow-sm"
-                />
-              </div>
-            </div>
-
-            <div className="p-4 space-y-4">
-              {filteredData.length > 0 ? (
-                filteredData.map((item) => (
-                  <ProjectCard
-                    key={item.id}
-                    item={item}
-                    onClick={setSelectedItem}
-                  />
-                ))
-              ) : (
-                <div className="text-center py-12">
-                    <div className="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Search className="text-gray-400" size={24}/>
-                    </div>
-                    <p className="text-gray-500">No {activeTab}s found matching your search.</p>
+        {/* KPI CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+             <StatsCard title="Total Projects" value={currentData.length} gradient="bg-gradient-to-br from-blue-600 to-blue-800" />
+             <StatsCard title="Active Students" value="42" gradient="bg-gradient-to-br from-indigo-500 to-indigo-700" />
+             <StatsCard title="Total Funding" value="₹ 4.5 Cr" gradient="bg-gradient-to-br from-cyan-500 to-cyan-700" />
+             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col justify-center items-center cursor-pointer hover:shadow-md transition-all" onClick={() => setActiveTab(activeTab === 'startup' ? 'research' : 'startup')}>
+                <p className="text-sm text-gray-500 font-medium">Current View</p>
+                <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xl font-bold ${activeTab === 'startup' ? 'text-blue-600' : 'text-purple-600'}`}>
+                        {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}s
+                    </span>
+                    <Activity size={18} className="text-gray-400" />
                 </div>
-              )}
-            </div>
-          </div>
-        </main>
+             </div>
+        </div>
 
-        {/* RIGHT SIDEBAR (Analytics) */}
-        <aside className="w-full lg:w-80 flex-shrink-0 space-y-6">
-          
-          {/* VISUALIZATION: BAR CHART (Funding/Type) */}
-          <div className="bg-white rounded-xl shadow-md border p-6">
-            <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                <BarChart2 size={18} className="text-[#0D47A1]" />
-                {activeTab === 'startup' ? 'Funding Stages' : 'Project Types'}
-            </h3>
-            <div className="h-[200px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart layout="vertical" data={barChartData} margin={{ left: 0, right: 30 }}>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                        <XAxis type="number" hide />
-                        <YAxis dataKey="name" type="category" width={80} tick={{fontSize: 11}} interval={0}/>
-                        <Tooltip cursor={{fill: '#f3f4f6'}} />
-                        <Bar dataKey="value" fill="#0D47A1" radius={[0, 4, 4, 0]} barSize={20} />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* LEFT COLUMN: Main Charts */}
+            <div className="lg:col-span-2 space-y-6">
+                
+                {/* 1. SCATTER PLOT (Impact Matrix) */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative group">
+                    <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                            <Layers size={18} className="text-[#0D47A1]"/> 
+                            Impact Matrix (Duration vs. Traction)
+                        </h3>
+                    </div>
+                    <div className="p-4 h-[320px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                                <XAxis type="number" dataKey="x" name="Duration" unit=" mos" tick={{fontSize: 12}}>
+                                    <Label value="Duration (Months)" offset={-10} position="insideBottom" style={{ fontSize: '12px', fill: '#666' }} />
+                                </XAxis>
+                                <YAxis type="number" dataKey="y" name="Traction" unit=" pts" tick={{fontSize: 12}}>
+                                    <Label value="Traction Score" angle={-90} position="insideLeft" style={{ fontSize: '12px', fill: '#666' }} />
+                                </YAxis>
+                                <ZAxis type="number" dataKey="z" range={[60, 400]} />
+                                <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'}} />
+                                <Legend verticalAlign="top" height={36}/>
+                                <Scatter name="Projects" data={scatterData} fill="#0D47A1" fillOpacity={0.7} shape="circle" />
+                            </ScatterChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
 
-          {/* VISUALIZATION: PIE CHART (Domains) */}
-          <div className="bg-white rounded-xl shadow-md border p-6">
-            <h3 className="text-lg font-semibold mb-2">Domain Distribution</h3>
-            <div className="h-[220px] relative">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={domainData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {domainData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {/* 2. AREA CHART (Timeline) */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                        <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                            <TrendingUp size={18} className="text-[#0D47A1]"/> 
+                            Growth Timeline
+                        </h3>
+                    </div>
+                    <div className="p-4 h-[250px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={timelineData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="#0D47A1" stopOpacity={0.3}/>
+                                        <stop offset="95%" stopColor="#0D47A1" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0"/>
+                                <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} dy={10} />
+                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF', fontSize: 12}} />
+                                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none' }} />
+                                <Legend verticalAlign="top" height={36}/>
+                                <Area name="New Projects" type="monotone" dataKey="count" stroke="#0D47A1" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+            </div>
+
+            {/* RIGHT COLUMN: Secondary Charts */}
+            <div className="space-y-6">
+                
+                {/* 3. RADAR CHART (Ecosystem Shape) */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 className="text-sm uppercase tracking-wider font-bold mb-4 text-gray-500 flex items-center gap-2">
+                        <Hexagon size={16} className="text-[#0D47A1]" /> Ecosystem Focus
+                    </h3>
+                    <div className="h-[250px]">
+                         <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                                <PolarGrid stroke="#E5E7EB" />
+                                <PolarAngleAxis dataKey="subject" tick={{fontSize: 10, fill: '#6B7280'}} />
+                                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                                <Radar name="Volume" dataKey="A" stroke="#0D47A1" strokeWidth={2} fill="#0D47A1" fillOpacity={0.4} />
+                                <Radar name="Quality" dataKey="B" stroke="#00D1FD" strokeWidth={2} fill="#00D1FD" fillOpacity={0.2} />
+                                <Legend iconType="circle" iconSize={8} wrapperStyle={{fontSize: '12px', paddingTop: '10px'}}/>
+                                <Tooltip contentStyle={{borderRadius: '8px', border: 'none'}} />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                {/* 4. PIE CHART (Distribution) */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 className="text-sm uppercase tracking-wider font-bold mb-4 text-gray-500">Distribution</h3>
+                    <div className="h-[250px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie
+                                    data={barChartData}
+                                    cx="50%"
+                                    cy="45%"
+                                    innerRadius={50}
+                                    outerRadius={70}
+                                    paddingAngle={5}
+                                    dataKey="value"
+                                >
+                                    {barChartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip contentStyle={{borderRadius: '8px', border: 'none'}} />
+                                <Legend 
+                                    verticalAlign="bottom" 
+                                    height={36} 
+                                    iconType="circle" 
+                                    iconSize={8}
+                                    layout="horizontal"
+                                    wrapperStyle={{fontSize: '11px'}} 
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {/* SEARCH & FILTER LIST */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 min-h-[500px] flex flex-col">
+             <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 bg-gray-50/50 rounded-t-2xl">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      placeholder={`Search ${activeTab}s...`}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0D47A1]/20 focus:border-[#0D47A1] outline-none transition-all"
+                    />
+                  </div>
+                  <div className="relative w-full sm:w-48">
+                    <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <select
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                        className="w-full pl-9 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0D47A1]/20 outline-none appearance-none cursor-pointer text-sm font-medium"
+                    >
+                        {uniqueStatuses.map(status => (
+                            <option key={status} value={status}>{status}</option>
+                        ))}
+                    </select>
+                  </div>
+             </div>
+
+             <div className="p-4 space-y-3 bg-gray-50/30 flex-1">
+                <AnimatePresence mode="popLayout">
+                    {filteredData.map((item, index) => (
+                        <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2, delay: index * 0.05 }}
+                        >
+                            <ProjectCard item={item} onClick={setSelectedItem} />
+                        </motion.div>
                     ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend verticalAlign="bottom" height={50} iconType="circle" iconSize={8} />
-                </PieChart>
-              </ResponsiveContainer>
-              {/* Center Text Overlay */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none pb-6">
-                 <div className="text-2xl font-bold text-gray-800">{currentData.length}</div>
-                 <div className="text-xs text-gray-500 uppercase tracking-wide">Total</div>
-              </div>
-            </div>
-          </div>
-
-            {/* Quick Stats Grid */}
-            <div className="grid grid-cols-2 gap-3">
-              <StatsCard
-                title="Total"
-                value={currentData.length}
-                gradient="bg-gradient-to-br from-[#0D47A1] to-[#1e88e5]"
-              />
-               <StatsCard
-                title="Students"
-                value="47"
-                gradient="bg-gradient-to-br from-[#1e88e5] to-[#64b5f6]"
-              />
-            </div>
-
-        </aside>
+                </AnimatePresence>
+             </div>
+        </div>
       </div>
 
-      {/* MODALS */}
-      <ProjectModal
-        item={selectedItem}
-        activeTab={activeTab}
-        onClose={() => setSelectedItem(null)}
-      />
+      <AnimatePresence>
+        {selectedItem && (
+          <ProjectModal item={selectedItem} activeTab={activeTab} onClose={() => setSelectedItem(null)} />
+        )}
+      </AnimatePresence>
        
-      <AboutPopup 
-        isOpen={aboutOpen} 
-        onClose={() => setAboutOpen(false)} 
-      />
+      <AboutPopup isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
     </div>
   );
 };
